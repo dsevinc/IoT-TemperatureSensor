@@ -1,40 +1,33 @@
-#include "DHT.h"
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
-#define DHTPIN 7
-#define DHTTYPE DHT11
-DHT dht(DHTPIN, DHTTYPE);
+#define ONE_WIRE_BUS 5
+#define pwm_pin 3
+OneWire oneWire(ONE_WIRE_BUS);
 
-void setup() {
+DallasTemperature sensors(&oneWire);
+
+ float Celcius=0;
+ float Fahrenheit=0;
+void setup(void)
+{
+  pinMode(pwm_pin, OUTPUT);
   Serial.begin(9600);
-  Serial.println(F("DHTxx test!"));
-
-  dht.begin();
+  sensors.begin();
 }
 
-void loop() {
-  delay(2000);
-
-  float h = dht.readHumidity();
-  float t = dht.readTemperature();
-  float f = dht.readTemperature(true);
-
-  if (isnan(h) || isnan(t) || isnan(f)) {
-    Serial.println(F("Failed to read from DHT sensor!"));
-    return;
-  }
-
-  float hif = dht.computeHeatIndex(f, h);
-  float hic = dht.computeHeatIndex(t, h, false);
-
-  Serial.print(F("Humidity: "));
-  Serial.print(h);
-  Serial.print(F("%  Temperature: "));
-  Serial.print(t);
-  Serial.print(F("°C "));
-  Serial.print(f);
-  Serial.print(F("°F  Heat index: "));
-  Serial.print(hic);
-  Serial.print(F("°C "));
-  Serial.print(hif);
-  Serial.println(F("°F"));
+void loop(void)
+{ 
+  digitalWrite(pwm_pin,LOW);
+  delay(500);
+  digitalWrite(pwm_pin, HIGH);
+  delay(100);
+  sensors.requestTemperatures(); 
+  Celcius=sensors.getTempCByIndex(0);
+  Fahrenheit=sensors.toFahrenheit(Celcius);
+  Serial.print(" C  ");
+  Serial.print(Celcius);
+  Serial.print(" F  ");
+  Serial.println(Fahrenheit);
+  delay(100);
 }
